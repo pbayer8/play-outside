@@ -21,10 +21,9 @@ export class WeatherService {
 
 		// Process each hour of the forecast
 		for (let i = 0; i < data.hourly.time.length; i++) {
-			// Parse the time string and adjust for timezone
+			// Parse the time string (already in Denver timezone)
 			const timeStr = data.hourly.time[i];
-			const time = new Date(`${timeStr}Z`); // Append Z to force UTC interpretation
-			const denverTime = new Date(time.getTime() - 6 * 60 * 60 * 1000); // Adjust for Denver timezone (UTC-6)
+			const time = new Date(timeStr);
 
 			const temperature = data.hourly.temperature_2m[i];
 			const precipChance = data.hourly.precipitation_probability[i] ?? 0;
@@ -32,13 +31,12 @@ export class WeatherService {
 
 			console.log(`Processing weather data point ${i}:`);
 			console.log(`Raw time: ${timeStr}`);
-			console.log(`UTC time: ${time.toISOString()}`);
-			console.log(`Denver time: ${denverTime.toISOString()}`);
-			console.log(`Denver hour: ${denverTime.getHours()}`);
+			console.log(`Parsed time: ${time.toISOString()}`);
+			console.log(`Hour: ${time.getHours()}`);
 
 			windows.push({
-				start: denverTime,
-				end: new Date(denverTime.getTime() + 60 * 60 * 1000), // Add 1 hour
+				start: time,
+				end: new Date(time.getTime() + 60 * 60 * 1000), // Add 1 hour
 				temperature,
 				precipChance,
 				windSpeed,
