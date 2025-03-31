@@ -5,15 +5,18 @@ export class WeatherService {
 	private readonly baseUrl = "https://api.open-meteo.com/v1";
 
 	async getHourlyForecast(days: number): Promise<NiceWeatherWindow[]> {
-		const response = await fetch(
-			`${this.baseUrl}/forecast?latitude=${config.LATITUDE}&longitude=${config.LONGITUDE}&hourly=temperature_2m,precipitation_probability,windspeed_10m&temperature_unit=fahrenheit&timezone=America%2FDenver&forecast_days=${days}`,
-		);
+		const url = `${this.baseUrl}/forecast?latitude=${config.LATITUDE}&longitude=${config.LONGITUDE}&hourly=temperature_2m,precipitation_probability,windspeed_10m&temperature_unit=fahrenheit&timezone=America%2FDenver&forecast_days=${days}`;
+		console.log("Fetching weather data from:", url);
+
+		const response = await fetch(url);
 
 		if (!response.ok) {
 			throw new Error(`Weather API error: ${response.statusText}`);
 		}
 
 		const data = await response.json();
+		console.log("Weather API response:", JSON.stringify(data, null, 2));
+
 		const windows: NiceWeatherWindow[] = [];
 
 		// Process each hour of the forecast
@@ -36,6 +39,13 @@ export class WeatherService {
 				windSpeed,
 			});
 		}
+
+		console.log(`Created ${windows.length} weather windows`);
+		console.log("First window:", JSON.stringify(windows[0], null, 2));
+		console.log(
+			"Last window:",
+			JSON.stringify(windows[windows.length - 1], null, 2),
+		);
 
 		return windows;
 	}

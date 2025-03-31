@@ -12,9 +12,28 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 	const weatherData = await weatherService.getHourlyForecast(
 		config.DAYS_TO_FORECAST,
 	);
+	console.log(`Received ${weatherData.length} weather data points`);
+	console.log(
+		"First weather data point:",
+		JSON.stringify(weatherData[0], null, 2),
+	);
+	console.log(
+		"Last weather data point:",
+		JSON.stringify(weatherData[weatherData.length - 1], null, 2),
+	);
+
 	console.log("Fetching daylight data");
 	const daylightWindows = sunlightService.getDaylightWindows(
 		config.DAYS_TO_FORECAST,
+	);
+	console.log(`Received ${daylightWindows.length} daylight windows`);
+	console.log(
+		"First daylight window:",
+		JSON.stringify(daylightWindows[0], null, 2),
+	);
+	console.log(
+		"Last daylight window:",
+		JSON.stringify(daylightWindows[daylightWindows.length - 1], null, 2),
 	);
 
 	const allWindows: NiceWeatherWindow[] = [];
@@ -24,15 +43,28 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 		const dayStart = new Date(day.sunrise);
 		const dayEnd = new Date(day.sunset);
 
+		console.log(`\nProcessing day: ${dayStart.toISOString()}`);
+		console.log(`Sunrise: ${dayStart.toISOString()}`);
+		console.log(`Sunset: ${dayEnd.toISOString()}`);
+
 		// Find weather data for this day
 		const dayWeather = weatherData.filter((w) => {
 			const wDate = new Date(w.start);
-			return (
+			const isSameDay =
 				wDate.getFullYear() === dayStart.getFullYear() &&
 				wDate.getMonth() === dayStart.getMonth() &&
-				wDate.getDate() === dayStart.getDate()
-			);
+				wDate.getDate() === dayStart.getDate();
+
+			if (isSameDay) {
+				console.log(
+					`Found weather data for hour ${wDate.getHours()}:`,
+					JSON.stringify(w, null, 2),
+				);
+			}
+			return isSameDay;
 		});
+
+		console.log(`Found ${dayWeather.length} weather data points for this day`);
 
 		// Create hourly windows from sunrise to sunset
 		for (let hour = dayStart.getHours(); hour <= dayEnd.getHours(); hour++) {
@@ -59,6 +91,20 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 			});
 
 			if (hourWeather) {
+				console.log(
+					`Creating window for hour ${hour}:`,
+					JSON.stringify(
+						{
+							start: windowStart.toISOString(),
+							end: windowEnd.toISOString(),
+							temperature: hourWeather.temperature,
+							precipChance: hourWeather.precipChance,
+							windSpeed: hourWeather.windSpeed,
+						},
+						null,
+						2,
+					),
+				);
 				allWindows.push({
 					start: windowStart,
 					end: windowEnd,
@@ -66,10 +112,13 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 					precipChance: hourWeather.precipChance,
 					windSpeed: hourWeather.windSpeed,
 				});
+			} else {
+				console.log(`No weather data found for hour ${hour}`);
 			}
 		}
 	}
 
+	console.log(`\nTotal windows created: ${allWindows.length}`);
 	return allWindows;
 }
 
