@@ -39,6 +39,8 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 			);
 		});
 
+		console.log("Day weather", dayWeather[0], dayWeather.length);
+
 		// Create hourly windows from sunrise to sunset
 		for (let hour = dayStart.getHours(); hour <= dayEnd.getHours(); hour++) {
 			const windowStart = new Date(dayStart);
@@ -57,11 +59,15 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 				windowEnd.setTime(dayEnd.getTime());
 			}
 
+			console.log("Window start", windowStart, "Window end", windowEnd);
+
 			// Find matching weather data
 			const hourWeather = dayWeather.find((w) => {
 				const wDate = new Date(w.start);
 				return wDate.getHours() === hour;
 			});
+
+			console.log("Hour weather", hourWeather);
 
 			if (hourWeather) {
 				allWindows.push({
@@ -73,6 +79,7 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 				});
 			}
 		}
+		console.log("Day windows", allWindows[0], allWindows.length);
 	}
 
 	console.log("All windows", allWindows[0], allWindows.length);
