@@ -204,11 +204,11 @@ export class CalendarService {
 						summary: window.conditions,
 						start: {
 							dateTime: window.start.toISOString(),
-							timeZone: "America/Denver",
+							// timeZone: "America/Denver",
 						},
 						end: {
 							dateTime: window.end.toISOString(),
-							timeZone: "America/Denver",
+							// timeZone: "America/Denver",
 						},
 						description: [
 							`Temperature: ${minTemp === maxTemp ? minTemp : `${minTemp} - ${maxTemp}`}°F`,

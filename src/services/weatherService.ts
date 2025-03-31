@@ -6,7 +6,7 @@ export class WeatherService {
 
 	async getHourlyForecast(days: number): Promise<NiceWeatherWindow[]> {
 		const response = await fetch(
-			`${this.baseUrl}/forecast?latitude=${config.LATITUDE}&longitude=${config.LONGITUDE}&hourly=temperature_2m,precipitation_probability,windspeed_10m&temperature_unit=fahrenheit&timezone=America%2FDenver&forecast_days=${days}`,
+			`${this.baseUrl}/forecast?latitude=${config.LATITUDE}&longitude=${config.LONGITUDE}&hourly=temperature_2m,precipitation_probability,windspeed_10m&temperature_unit=fahrenheit&forecast_days=${days}`,
 		);
 
 		if (!response.ok) {

@@ -32,19 +32,24 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 		// Find weather data for this day
 		const dayWeather = weatherData.filter((w) => {
 			const wDate = new Date(w.start);
+			const dDate = new Date(dayStart);
+
+			// Compare UTC dates to avoid time zone issues
 			return (
-				wDate.getFullYear() === dayStart.getFullYear() &&
-				wDate.getMonth() === dayStart.getMonth() &&
-				wDate.getDate() === dayStart.getDate()
+				wDate.getUTCFullYear() === dDate.getUTCFullYear() &&
+				wDate.getUTCMonth() === dDate.getUTCMonth() &&
+				wDate.getUTCDate() === dDate.getUTCDate()
 			);
 		});
 
-		console.log("Day weather", dayWeather[0], dayWeather.length);
-
-		// Create hourly windows from sunrise to sunset
-		for (let hour = dayStart.getHours(); hour <= dayEnd.getHours(); hour++) {
+		// Also update the hour loop to use UTC hours
+		for (
+			let hour = dayStart.getUTCHours();
+			hour <= dayEnd.getUTCHours();
+			hour++
+		) {
 			const windowStart = new Date(dayStart);
-			windowStart.setHours(hour, 0, 0, 0);
+			windowStart.setUTCHours(hour, 0, 0, 0);
 
 			// Don't start before sunrise
 			if (windowStart < dayStart) {

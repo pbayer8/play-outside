@@ -9,7 +9,7 @@ export class SunlightService {
 
 		for (let i = 0; i < days; i++) {
 			const date = new Date(now);
-			date.setDate(date.getDate() + i);
+			date.setDate(date.getUTCDate() + i);
 
 			const times = SunCalc.getTimes(date, config.LATITUDE, config.LONGITUDE);
 			windows.push({
