@@ -26,11 +26,6 @@ export class WeatherService {
 			const precipChance = data.hourly.precipitation_probability[i] ?? 0;
 			const windSpeed = data.hourly.windspeed_10m[i] ?? 0;
 
-			// Skip if we're beyond the requested number of days
-			if (time.getTime() > Date.now() + days * 24 * 60 * 60 * 1000) {
-				break;
-			}
-
 			windows.push({
 				start: time,
 				end: new Date(time.getTime() + 60 * 60 * 1000), // Add 1 hour
