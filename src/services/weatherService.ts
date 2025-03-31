@@ -26,6 +26,12 @@ export class WeatherService {
 			const precipChance = data.hourly.precipitation_probability[i] ?? 0;
 			const windSpeed = data.hourly.windspeed_10m[i] ?? 0;
 
+			console.log(`Processing weather data point ${i}:`);
+			console.log(`Raw time: ${data.hourly.time[i]}`);
+			console.log(`Parsed time: ${time.toISOString()}`);
+			console.log(`Local hours: ${time.getHours()}`);
+			console.log(`Timezone offset: ${time.getTimezoneOffset()}`);
+
 			windows.push({
 				start: time,
 				end: new Date(time.getTime() + 60 * 60 * 1000), // Add 1 hour

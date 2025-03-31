@@ -84,26 +84,24 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 				windowEnd.setTime(dayEnd.getTime());
 			}
 
+			console.log(`\nChecking hour ${hour}:`);
+			console.log(`Window start: ${windowStart.toISOString()}`);
+			console.log(`Window end: ${windowEnd.toISOString()}`);
+
 			// Find matching weather data
 			const hourWeather = dayWeather.find((w) => {
 				const wDate = new Date(w.start);
-				return wDate.getHours() === hour;
+				const matches = wDate.getHours() === hour;
+				console.log(
+					`Comparing weather data hour ${wDate.getHours()} with target hour ${hour}: ${matches}`,
+				);
+				return matches;
 			});
 
 			if (hourWeather) {
 				console.log(
-					`Creating window for hour ${hour}:`,
-					JSON.stringify(
-						{
-							start: windowStart.toISOString(),
-							end: windowEnd.toISOString(),
-							temperature: hourWeather.temperature,
-							precipChance: hourWeather.precipChance,
-							windSpeed: hourWeather.windSpeed,
-						},
-						null,
-						2,
-					),
+					`Found matching weather data for hour ${hour}:`,
+					JSON.stringify(hourWeather, null, 2),
 				);
 				allWindows.push({
 					start: windowStart,
@@ -114,6 +112,9 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 				});
 			} else {
 				console.log(`No weather data found for hour ${hour}`);
+				console.log(
+					`Available weather data hours: ${dayWeather.map((w) => new Date(w.start).getHours()).join(", ")}`,
+				);
 			}
 		}
 	}
