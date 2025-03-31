@@ -1,0 +1,28 @@
+{
+	"name": "weather-calendar",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"preview": "vite preview",
+		"start": "tsx src/index.ts",
+		"clear": "tsx src/clearCalendar.ts",
+		"clear-upcoming": "tsx src/clearUpcoming.ts"
+	},
+	"devDependencies": {
+		"@types/node": "^22.13.14",
+		"@types/suncalc": "^1.9.2",
+		"tsx": "^4.19.3",
+		"typescript": "~5.7.2",
+		"vite": "^6.2.0"
+	},
+	"dependencies": {
+		"axios": "^1.8.4",
+		"dotenv": "^16.4.7",
+		"googleapis": "^148.0.0",
+		"suncalc": "^1.9.0",
+		"sunrise-sunset-js": "^2.2.1"
+	}
+}

@@ -1,0 +1,32 @@
+name: Update Weather Calendar
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Runs every hour
+  workflow_dispatch:      # Allows manual triggering
+
+jobs:
+  update-calendar:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+      
+      - name: Install dependencies
+        run: pnpm install
+      
+      - name: Build and run
+        env:
+          GOOGLE_CALENDAR_ID: ${{ secrets.GOOGLE_CALENDAR_ID }}
+          GOOGLE_CLIENT_EMAIL: ${{ secrets.GOOGLE_CLIENT_EMAIL }}
+          GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
+        run: pnpm start 
