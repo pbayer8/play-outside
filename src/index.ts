@@ -12,11 +12,16 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 	const weatherData = await weatherService.getHourlyForecast(
 		config.DAYS_TO_FORECAST,
 	);
+	console.log("Weather data fetched", weatherData[0], weatherData.length);
 	console.log("Fetching daylight data");
 	const daylightWindows = sunlightService.getDaylightWindows(
 		config.DAYS_TO_FORECAST,
 	);
-
+	console.log(
+		"Daylight data fetched",
+		daylightWindows[0],
+		daylightWindows.length,
+	);
 	const allWindows: NiceWeatherWindow[] = [];
 
 	// For each daylight window, create hourly weather windows
@@ -70,6 +75,7 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 		}
 	}
 
+	console.log("All windows", allWindows[0], allWindows.length);
 	return allWindows;
 }
 
