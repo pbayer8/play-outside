@@ -21,9 +21,10 @@ export class WeatherService {
 
 		// Process each hour of the forecast
 		for (let i = 0; i < data.hourly.time.length; i++) {
-			// Parse the time string (already in Denver timezone)
+			// Parse the time string and adjust for timezone
 			const timeStr = data.hourly.time[i];
-			const time = new Date(timeStr);
+			// Create a date object and adjust for Denver timezone (UTC-6)
+			const time = new Date(`${timeStr}T00:00:00-06:00`);
 
 			const temperature = data.hourly.temperature_2m[i];
 			const precipChance = data.hourly.precipitation_probability[i] ?? 0;
