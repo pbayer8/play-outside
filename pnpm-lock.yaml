@@ -26,9 +26,6 @@ importers:
       suncalc:
         specifier: ^1.9.0
         version: 1.9.0
-      sunrise-sunset-js:
-        specifier: ^2.2.1
-        version: 2.2.1
       tz-lookup:
         specifier: ^6.1.25
         version: 6.1.25
@@ -582,9 +579,6 @@ packages:
 
   suncalc@1.9.0:
     resolution: {integrity: sha512-vMJ8Byp1uIPoj+wb9c1AdK4jpkSKVAywgHX0lqY7zt6+EWRRC3Z+0Ucfjy/0yxTVO1hwwchZe4uoFNqrIC24+A==}
-
-  sunrise-sunset-js@2.2.1:
-    resolution: {integrity: sha512-ErsvmxoTCZRacVPtlchkrTAR8qxypBy0BDrrv9LMugLuF0AykcS5pQsP1EhQJHgumxrTTSI8N8KJkQMVJ6dEPw==}
 
   tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
@@ -1140,8 +1134,6 @@ snapshots:
   source-map-js@1.2.1: {}
 
   suncalc@1.9.0: {}
-
-  sunrise-sunset-js@2.2.1: {}
 
   tr46@0.0.3: {}
 
