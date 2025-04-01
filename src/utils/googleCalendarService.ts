@@ -129,7 +129,7 @@ export async function clearUpcomingEvents() {
 					}),
 			);
 
-			console.log("API Response:", JSON.stringify(response.data, null, 2));
+			console.log("API Result:", response.data.items?.length);
 
 			const events = response.data.items || [];
 			allEvents = allEvents.concat(events);
@@ -151,7 +151,6 @@ export async function clearUpcomingEvents() {
 		for (const event of allEvents) {
 			const eventId = event.id;
 			if (eventId) {
-				console.log(`Deleting event: ${event.summary} (${eventId})`);
 				await withRetry(() =>
 					calendar.events.delete({
 						calendarId: config.GOOGLE_CALENDAR_ID,

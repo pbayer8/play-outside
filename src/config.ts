@@ -34,7 +34,7 @@ export const config = {
 	DAYS_TO_FORECAST: 14,
 
 	// daylight hours
-	INCLUDE_CIVIL_TWILIGHT: true,
+	INCLUDE_CIVIL_TWILIGHT: false,
 };
 
 process.env.TZ = TZ;
