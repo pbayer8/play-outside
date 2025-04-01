@@ -1,3 +1,4 @@
+import { backOff } from "exponential-backoff";
 import type { calendar_v3 } from "googleapis";
 import { google } from "googleapis";
 import { config } from "../config";
@@ -24,13 +25,61 @@ const auth = new google.auth.JWT({
 
 const calendar = google.calendar({ version: "v3", auth });
 
+interface RateLimitError {
+	response?: {
+		status?: number;
+		data?: {
+			error?: {
+				message?: string;
+			};
+		};
+	};
+}
+
+// Helper function to check if an error is a rate limit error
+function isRateLimitError(error: RateLimitError): boolean {
+	return (
+		(error?.response?.status === 429 ||
+			error?.response?.status === 403 ||
+			error?.response?.data?.error?.message?.includes("Rate Limit Exceeded")) ??
+		false
+	);
+}
+
+// Wrapper function to handle rate limiting with exponential backoff
+async function withRetry<T>(
+	operation: () => Promise<T>,
+	maxAttempts = 5,
+): Promise<T> {
+	return backOff(
+		async () => {
+			try {
+				return await operation();
+			} catch (error) {
+				if (isRateLimitError(error as RateLimitError)) {
+					throw error; // Let backOff handle the retry
+				}
+				throw error; // Re-throw non-rate-limit errors
+			}
+		},
+		{
+			numOfAttempts: maxAttempts,
+			startingDelay: 1000, // Start with 1 second delay
+			maxDelay: 32000, // Max delay of 32 seconds
+			retry: (error: unknown) => isRateLimitError(error as RateLimitError),
+		},
+	);
+}
+
 export async function clearAllEvents(includePast = false) {
 	try {
 		const now = new Date();
-		const response = await calendar.events.list({
-			calendarId: config.GOOGLE_CALENDAR_ID,
-			timeMin: includePast ? "2020-01-01T00:00:00Z" : now.toISOString(),
-		});
+		const response = await withRetry(() =>
+			calendar.events.list({
+				calendarId: config.GOOGLE_CALENDAR_ID,
+				timeMin: includePast ? "2020-01-01T00:00:00Z" : now.toISOString(),
+			}),
+		);
 
 		const events = response.data.items;
 		if (!events || events.length === 0) {
@@ -41,11 +90,14 @@ export async function clearAllEvents(includePast = false) {
 		console.log(`Found ${events.length} events to clear`);
 
 		for (const event of events) {
-			if (event.id) {
-				await calendar.events.delete({
-					calendarId: config.GOOGLE_CALENDAR_ID,
-					eventId: event.id,
-				});
+			const eventId = event.id;
+			if (eventId) {
+				await withRetry(() =>
+					calendar.events.delete({
+						calendarId: config.GOOGLE_CALENDAR_ID,
+						eventId: eventId,
+					}),
+				);
 			}
 		}
 
@@ -68,12 +120,14 @@ export async function clearUpcomingEvents() {
 		let pageToken: string | undefined = undefined;
 
 		do {
-			const response: { data: calendar_v3.Schema$Events } =
-				await calendar.events.list({
-					calendarId: config.GOOGLE_CALENDAR_ID,
-					timeMin: timeMin,
-					pageToken: pageToken,
-				});
+			const response: { data: calendar_v3.Schema$Events } = await withRetry(
+				() =>
+					calendar.events.list({
+						calendarId: config.GOOGLE_CALENDAR_ID,
+						timeMin: timeMin,
+						pageToken: pageToken,
+					}),
+			);
 
 			console.log("API Response:", JSON.stringify(response.data, null, 2));
 
@@ -95,12 +149,15 @@ export async function clearUpcomingEvents() {
 		console.log(`Found ${allEvents.length} total events to clear.`);
 
 		for (const event of allEvents) {
-			if (event.id) {
-				console.log(`Deleting event: ${event.summary} (${event.id})`);
-				await calendar.events.delete({
-					calendarId: config.GOOGLE_CALENDAR_ID,
-					eventId: event.id,
-				});
+			const eventId = event.id;
+			if (eventId) {
+				console.log(`Deleting event: ${event.summary} (${eventId})`);
+				await withRetry(() =>
+					calendar.events.delete({
+						calendarId: config.GOOGLE_CALENDAR_ID,
+						eventId: eventId,
+					}),
+				);
 			}
 		}
 
@@ -118,20 +175,22 @@ export async function createEvent(event: {
 	description: string;
 	colorId: string;
 }) {
-	return calendar.events.insert({
-		calendarId: config.GOOGLE_CALENDAR_ID,
-		requestBody: {
-			summary: event.summary,
-			start: {
-				dateTime: event.start.toISOString(),
-				timeZone: config.TZ,
+	return withRetry(() =>
+		calendar.events.insert({
+			calendarId: config.GOOGLE_CALENDAR_ID,
+			requestBody: {
+				summary: event.summary,
+				start: {
+					dateTime: event.start.toISOString(),
+					timeZone: config.TZ,
+				},
+				end: {
+					dateTime: event.end.toISOString(),
+					timeZone: config.TZ,
+				},
+				description: event.description,
+				colorId: event.colorId,
 			},
-			end: {
-				dateTime: event.end.toISOString(),
-				timeZone: config.TZ,
-			},
-			description: event.description,
-			colorId: event.colorId,
-		},
-	});
+		}),
+	);
 }
