@@ -9,7 +9,8 @@
 		"preview": "vite preview",
 		"start": "tsx src/index.ts",
 		"clear": "tsx src/clearCalendar.ts",
-		"clear-upcoming": "tsx src/clearUpcoming.ts"
+		"clear-upcoming": "tsx src/clearUpcoming.ts",
+		"weather": "tsx src/weather.ts"
 	},
 	"devDependencies": {
 		"@types/node": "^22.13.14",
@@ -23,6 +24,7 @@
 		"axios": "^1.8.4",
 		"dotenv": "^16.4.7",
 		"googleapis": "^148.0.0",
+		"openmeteo": "^1.2.0",
 		"suncalc": "^1.9.0",
 		"sunrise-sunset-js": "^2.2.1",
 		"tz-lookup": "^6.1.25"

@@ -17,6 +17,9 @@ importers:
       googleapis:
         specifier: ^148.0.0
         version: 148.0.0
+      openmeteo:
+        specifier: ^1.2.0
+        version: 1.2.0
       suncalc:
         specifier: ^1.9.0
         version: 1.9.0
@@ -197,6 +200,10 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@openmeteo/sdk@1.19.0':
+    resolution: {integrity: sha512-R9iYVRBs/0vq+iLRA0/quvcnuCsLp8DLsaMF2i6dhkc/C6jJ5RbV3al0bt4gfhwi1R76crDd9nnw6b9x2V1yeg==}
+    engines: {node: '>=12.0'}
 
   '@rollup/rollup-android-arm-eabi@4.38.0':
     resolution: {integrity: sha512-ldomqc4/jDZu/xpYU+aRxo3V4mGCV9HeTgUBANI3oIQMOL+SsxB+S2lxMpkFp5UamSS3XuTMQVbsS24R4J4Qjg==}
@@ -389,6 +396,9 @@ packages:
   extend@3.0.2:
     resolution: {integrity: sha512-fjquC59cD7CyW6urNXK0FBufkZcoiGG80wTuPujX590cB5Ttln20E2UB4S/WARVqhXffZl2LNgS+gQdPIIim/g==}
 
+  flatbuffers@25.2.10:
+    resolution: {integrity: sha512-7JlN9ZvLDG1McO3kbX0k4v+SUAg48L1rIwEvN6ZQl/eCtgJz9UylTMzE9wrmYrcorgxm3CX/3T/w5VAub99UUw==}
+
   follow-redirects@1.15.9:
     resolution: {integrity: sha512-gew4GsXizNgdoRyqmyfMHyAmXsZDk6mHkSxZFCzW9gwlbtOW44CDtYavM+y+72qD/Vq2l550kMF52DT8fOLJqQ==}
     engines: {node: '>=4.0'}
@@ -514,6 +524,10 @@ packages:
   object-inspect@1.13.4:
     resolution: {integrity: sha512-W67iLl4J2EXEGTbfeHCffrjDfitvLANg0UlX3wFUUSTx92KXRFegMHUVgSqE+wvhAbi4WqjGg9czysTV2Epbew==}
     engines: {node: '>= 0.4'}
+
+  openmeteo@1.2.0:
+    resolution: {integrity: sha512-YinFo02TM4wXdm9o2FBAO2u1ka3drNdnFsGNskiO8aCWvZa6nljh3ioH79ipwPdFhCrIiq/LCfpjDGXqH2RBFw==}
+    engines: {node: '>=12.0'}
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
@@ -715,6 +729,10 @@ snapshots:
   '@esbuild/win32-x64@0.25.2':
     optional: true
 
+  '@openmeteo/sdk@1.19.0':
+    dependencies:
+      flatbuffers: 25.2.10
+
   '@rollup/rollup-android-arm-eabi@4.38.0':
     optional: true
 
@@ -880,6 +898,8 @@ snapshots:
 
   extend@3.0.2: {}
 
+  flatbuffers@25.2.10: {}
+
   follow-redirects@1.15.9: {}
 
   form-data@4.0.2:
@@ -1031,6 +1051,11 @@ snapshots:
       whatwg-url: 5.0.0
 
   object-inspect@1.13.4: {}
+
+  openmeteo@1.2.0:
+    dependencies:
+      '@openmeteo/sdk': 1.19.0
+      flatbuffers: 25.2.10
 
   picocolors@1.1.1: {}
 

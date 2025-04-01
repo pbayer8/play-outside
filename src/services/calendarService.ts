@@ -100,15 +100,7 @@ export class CalendarService {
 				return;
 			}
 
-			console.log(
-				`Found ${allEvents.length} total events to clear. Event details:`,
-				allEvents.map((e) => ({
-					id: e.id,
-					summary: e.summary,
-					start: e.start?.dateTime || e.start?.date,
-					end: e.end?.dateTime || e.end?.date,
-				})),
-			);
+			console.log(`Found ${allEvents.length} total events to clear.`);
 
 			for (const event of allEvents) {
 				if (event.id) {

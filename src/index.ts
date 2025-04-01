@@ -9,9 +9,7 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 	const sunlightService = new SunlightService();
 
 	console.log("Fetching weather data");
-	const weatherData = await weatherService.getHourlyForecast(
-		config.DAYS_TO_FORECAST,
-	);
+	const weatherData = await weatherService.getForecast();
 	console.log("Fetching daylight data");
 	const daylightWindows = sunlightService.getDaylightWindows(
 		config.DAYS_TO_FORECAST,
@@ -19,7 +17,7 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 
 	const allWindows: NiceWeatherWindow[] = [];
 
-	// For each daylight window, create hourly weather windows
+	// For each daylight window, process weather windows
 	for (const day of daylightWindows) {
 		const dayStart = new Date(day.sunrise);
 		const dayEnd = new Date(day.sunset);
@@ -34,39 +32,27 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 			);
 		});
 
-		// Create hourly windows from sunrise to sunset
-		for (let hour = dayStart.getHours(); hour <= dayEnd.getHours(); hour++) {
-			const windowStart = new Date(dayStart);
-			windowStart.setHours(hour, 0, 0, 0);
+		// Process each weather window that falls within daylight hours
+		for (const weatherWindow of dayWeather) {
+			const windowStart = new Date(weatherWindow.start);
+			const windowEnd = new Date(weatherWindow.end);
 
-			// Don't start before sunrise
-			if (windowStart < dayStart) {
-				windowStart.setTime(dayStart.getTime());
+			// Skip if the window is completely outside daylight hours
+			if (windowEnd <= dayStart || windowStart >= dayEnd) {
+				continue;
 			}
 
-			const windowEnd = new Date(windowStart);
-			windowEnd.setHours(windowStart.getHours() + 1, 0, 0, 0);
+			// Adjust window to fit within daylight hours
+			const adjustedStart = windowStart < dayStart ? dayStart : windowStart;
+			const adjustedEnd = windowEnd > dayEnd ? dayEnd : windowEnd;
 
-			// Don't end after sunset
-			if (windowEnd > dayEnd) {
-				windowEnd.setTime(dayEnd.getTime());
-			}
-
-			// Find matching weather data
-			const hourWeather = dayWeather.find((w) => {
-				const wDate = new Date(w.start);
-				return wDate.getHours() === hour;
+			allWindows.push({
+				start: adjustedStart,
+				end: adjustedEnd,
+				temperature: weatherWindow.temperature,
+				precipChance: weatherWindow.precipChance,
+				windSpeed: weatherWindow.windSpeed,
 			});
-
-			if (hourWeather) {
-				allWindows.push({
-					start: windowStart,
-					end: windowEnd,
-					temperature: hourWeather.temperature,
-					precipChance: hourWeather.precipChance,
-					windSpeed: hourWeather.windSpeed,
-				});
-			}
 		}
 	}
 
