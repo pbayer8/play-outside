@@ -83,6 +83,8 @@ export class CalendarService {
 						pageToken: pageToken,
 					});
 
+				console.log("API Response:", JSON.stringify(response.data, null, 2));
+
 				const events = response.data.items || [];
 				allEvents = allEvents.concat(events);
 
@@ -98,10 +100,19 @@ export class CalendarService {
 				return;
 			}
 
-			console.log(`Found ${allEvents.length} total events to clear`);
+			console.log(
+				`Found ${allEvents.length} total events to clear. Event details:`,
+				allEvents.map((e) => ({
+					id: e.id,
+					summary: e.summary,
+					start: e.start?.dateTime || e.start?.date,
+					end: e.end?.dateTime || e.end?.date,
+				})),
+			);
 
 			for (const event of allEvents) {
 				if (event.id) {
+					console.log(`Deleting event: ${event.summary} (${event.id})`);
 					await this.calendar.events.delete({
 						calendarId: config.GOOGLE_CALENDAR_ID,
 						eventId: event.id,
@@ -204,11 +215,11 @@ export class CalendarService {
 						summary: window.conditions,
 						start: {
 							dateTime: window.start.toISOString(),
-							// timeZone: "America/Denver",
+							timeZone: config.TZ,
 						},
 						end: {
 							dateTime: window.end.toISOString(),
-							// timeZone: "America/Denver",
+							timeZone: config.TZ,
 						},
 						description: [
 							`Temperature: ${minTemp === maxTemp ? minTemp : `${minTemp} - ${maxTemp}`}°F`,

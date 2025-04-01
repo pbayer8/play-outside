@@ -1,5 +1,11 @@
 import dotenv from "dotenv";
+import tzlookup from "tz-lookup";
+
 dotenv.config();
+
+const LATITUDE = 35.6869752;
+const LONGITUDE = -105.937799;
+const TZ = tzlookup(LATITUDE, LONGITUDE);
 
 export const config = {
 	// Weather conditions
@@ -9,8 +15,9 @@ export const config = {
 	MAX_WIND_MPH: 25, // mph
 
 	// Location (Santa Fe, NM)
-	LATITUDE: 35.6869752,
-	LONGITUDE: -105.937799,
+	LATITUDE,
+	LONGITUDE,
+	TZ,
 
 	// APIs
 	GOOGLE_CALENDAR_ID: process.env.GOOGLE_CALENDAR_ID,
@@ -20,5 +27,7 @@ export const config = {
 	GOOGLE_PRIVATE_KEY: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
 
 	// Calendar event settings
-	DAYS_TO_FORECAST: 2,
+	DAYS_TO_FORECAST: 7,
 };
+
+process.env.TZ = TZ;

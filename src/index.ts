@@ -12,99 +12,51 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 	const weatherData = await weatherService.getHourlyForecast(
 		config.DAYS_TO_FORECAST,
 	);
-	console.log("Weather data fetched", weatherData[0], weatherData.length);
 	console.log("Fetching daylight data");
 	const daylightWindows = sunlightService.getDaylightWindows(
 		config.DAYS_TO_FORECAST,
 	);
-	console.log(
-		"Daylight data fetched",
-		daylightWindows[0],
-		daylightWindows.length,
-	);
+
 	const allWindows: NiceWeatherWindow[] = [];
 
 	// For each daylight window, create hourly weather windows
 	for (const day of daylightWindows) {
-		// Keep the original UTC timestamps
-		const dayStart = day.sunrise;
-		const dayEnd = day.sunset;
-
-		console.log("Processing day:", {
-			sunrise: dayStart.toISOString(),
-			sunset: dayEnd.toISOString(),
-		});
+		const dayStart = new Date(day.sunrise);
+		const dayEnd = new Date(day.sunset);
 
 		// Find weather data for this day
 		const dayWeather = weatherData.filter((w) => {
 			const wDate = new Date(w.start);
-			const wTime = wDate.getTime();
-
-			// Include weather data that falls between sunrise and sunset
-			return wTime >= dayStart.getTime() && wTime <= dayEnd.getTime();
+			return (
+				wDate.getFullYear() === dayStart.getFullYear() &&
+				wDate.getMonth() === dayStart.getMonth() &&
+				wDate.getDate() === dayStart.getDate()
+			);
 		});
 
-		console.log("Found weather data for day:", dayWeather.length);
-		if (dayWeather.length > 0) {
-			console.log("First weather data:", dayWeather[0]);
-			console.log("Last weather data:", dayWeather[dayWeather.length - 1]);
-		}
-
-		// Also update the hour loop to use UTC hours
-		for (
-			let hour = dayStart.getUTCHours();
-			hour <= dayEnd.getUTCHours();
-			hour++
-		) {
-			// Create window start using UTC timestamp
-			const windowStart = new Date(
-				Date.UTC(
-					dayStart.getUTCFullYear(),
-					dayStart.getUTCMonth(),
-					dayStart.getUTCDate(),
-					hour,
-					0,
-					0,
-					0,
-				),
-			);
+		// Create hourly windows from sunrise to sunset
+		for (let hour = dayStart.getHours(); hour <= dayEnd.getHours(); hour++) {
+			const windowStart = new Date(dayStart);
+			windowStart.setHours(hour, 0, 0, 0);
 
 			// Don't start before sunrise
-			if (windowStart.getTime() < dayStart.getTime()) {
+			if (windowStart < dayStart) {
 				windowStart.setTime(dayStart.getTime());
 			}
 
-			// Create window end using UTC timestamp
-			const windowEnd = new Date(
-				Date.UTC(
-					windowStart.getUTCFullYear(),
-					windowStart.getUTCMonth(),
-					windowStart.getUTCDate(),
-					windowStart.getUTCHours() + 1,
-					0,
-					0,
-					0,
-				),
-			);
+			const windowEnd = new Date(windowStart);
+			windowEnd.setHours(windowStart.getHours() + 1, 0, 0, 0);
 
 			// Don't end after sunset
-			if (windowEnd.getTime() > dayEnd.getTime()) {
+			if (windowEnd > dayEnd) {
 				windowEnd.setTime(dayEnd.getTime());
 			}
-
-			console.log("Window:", {
-				start: windowStart.toISOString(),
-				end: windowEnd.toISOString(),
-				hour,
-			});
 
 			// Find matching weather data
 			const hourWeather = dayWeather.find((w) => {
 				const wDate = new Date(w.start);
-				return wDate.getUTCHours() === hour;
+				return wDate.getHours() === hour;
 			});
-
-			console.log("Hour weather:", hourWeather ? "Found" : "Not found");
 
 			if (hourWeather) {
 				allWindows.push({
@@ -116,10 +68,8 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 				});
 			}
 		}
-		console.log("Current total windows:", allWindows.length);
 	}
 
-	console.log("All windows", allWindows[0], allWindows.length);
 	return allWindows;
 }
 
