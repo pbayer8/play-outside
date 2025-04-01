@@ -1,13 +1,12 @@
-import { WeatherCalendarService } from "./services/weatherCalendarService";
+import { clearAllEvents } from "./utils/weatherCalendarService";
 
-async function clearAllEvents() {
+async function main() {
 	try {
-		const calendarService = new WeatherCalendarService();
-		await calendarService.clearAllEvents(true);
+		await clearAllEvents(true);
 	} catch (error) {
 		console.error("Error:", error);
 		process.exit(1);
 	}
 }
 
-clearAllEvents();
+main();

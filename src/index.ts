@@ -1,19 +1,17 @@
 import { config } from "./config";
-import { SunlightService } from "./services/sunlightService";
-import { WeatherCalendarService } from "./services/weatherCalendarService";
-import { WeatherService } from "./services/weatherService";
 import type { NiceWeatherWindow } from "./types";
+import { getDaylightWindows } from "./utils/sunlightService";
+import {
+	clearUpcomingEvents,
+	createEvents,
+} from "./utils/weatherCalendarService";
+import { getForecast } from "./utils/weatherService";
 
 async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
-	const weatherService = new WeatherService();
-	const sunlightService = new SunlightService();
-
 	console.log("Fetching weather data");
-	const weatherData = await weatherService.getForecast();
+	const weatherData = await getForecast();
 	console.log("Fetching daylight data");
-	const daylightWindows = sunlightService.getDaylightWindows(
-		config.DAYS_TO_FORECAST,
-	);
+	const daylightWindows = getDaylightWindows(config.DAYS_TO_FORECAST);
 
 	const allWindows: NiceWeatherWindow[] = [];
 
@@ -61,17 +59,15 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 
 async function main() {
 	try {
-		const calendarService = new WeatherCalendarService();
-
 		// Clear existing weather windows
 		console.log("Clearing existing calendar events");
-		await calendarService.clearUpcomingEvents();
+		await clearUpcomingEvents();
 
 		// Find and create new weather windows
 		const weatherWindows = await getWeatherWindows();
 		console.log(`Found ${weatherWindows.length} weather windows`);
 
-		await calendarService.createEvents(weatherWindows);
+		await createEvents(weatherWindows);
 		console.log(
 			`Successfully created ${weatherWindows.length} weather windows`,
 		);
