@@ -230,8 +230,34 @@ export class CalendarService {
 		}
 	}
 
+	private isIdealConditions(
+		temperature: number,
+		precipChance: number,
+		windSpeed: number,
+	): boolean {
+		return (
+			temperature >= config.IDEAL_MIN_TEMP_F &&
+			temperature <= config.IDEAL_MAX_TEMP_F &&
+			precipChance <= config.IDEAL_PRECIP_CHANCE &&
+			windSpeed <= config.IDEAL_WIND_MPH
+		);
+	}
+
 	private getWeatherConditions(window: NiceWeatherWindow): string {
 		const conditions: string[] = [];
+
+		// Check for IDEAL conditions first
+		if (
+			this.isIdealConditions(
+				window.temperature,
+				window.precipChance,
+				window.windSpeed,
+			)
+		) {
+			return "🌟 Ideal Play Outside";
+		}
+
+		// Then check for unacceptable conditions
 		if (window.temperature < config.MIN_TEMP_F) conditions.push("❄️ Cold");
 		else if (window.temperature > config.MAX_TEMP_F) conditions.push("🔥 Hot");
 		if (window.precipChance > config.MAX_PRECIP_CHANCE)
@@ -246,7 +272,17 @@ export class CalendarService {
 		if (window.maxPrecipChance > config.MAX_PRECIP_CHANCE) return "9";
 		if (window.minTemp < config.MIN_TEMP_F) return "7";
 		if (window.maxTemp > config.MAX_TEMP_F) return "11";
-		if (window.maxWindSpeed > config.MAX_WIND_MPH) return "8";
+		if (window.maxWindSpeed > config.MAX_WIND_MPH) return "1";
+
+		if (
+			this.isIdealConditions(
+				window.minTemp,
+				window.maxPrecipChance,
+				window.maxWindSpeed,
+			)
+		) {
+			return "5";
+		}
 		return "2";
 	}
 

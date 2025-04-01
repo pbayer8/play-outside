@@ -13,6 +13,10 @@ export const config = {
 	MAX_TEMP_F: 75,
 	MAX_PRECIP_CHANCE: 20, // percentage
 	MAX_WIND_MPH: 25, // mph
+	IDEAL_MIN_TEMP_F: 55,
+	IDEAL_MAX_TEMP_F: 70,
+	IDEAL_PRECIP_CHANCE: 5, // percentage
+	IDEAL_WIND_MPH: 10, // mph
 
 	// Location (Santa Fe, NM)
 	LATITUDE,
