@@ -13,8 +13,8 @@ export class SunlightService {
 
 			const times = SunCalc.getTimes(date, config.LATITUDE, config.LONGITUDE);
 			windows.push({
-				sunrise: times.sunrise,
-				sunset: times.sunset,
+				sunrise: config.INCLUDE_CIVIL_TWILIGHT ? times.dawn : times.sunrise,
+				sunset: config.INCLUDE_CIVIL_TWILIGHT ? times.dusk : times.sunset,
 			});
 		}
 

@@ -32,6 +32,9 @@ export const config = {
 
 	// Calendar event settings
 	DAYS_TO_FORECAST: 14,
+
+	// daylight hours
+	INCLUDE_CIVIL_TWILIGHT: true,
 };
 
 process.env.TZ = TZ;
