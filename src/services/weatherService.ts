@@ -25,7 +25,7 @@ export class WeatherService {
 
 			windows.push({
 				start: time,
-				end: new Date(time.getTime() + 60 * 60 * 1000), // Add 1 hour
+				end: new Date(time.getTime() + 60 * 60 * 1000), // Add 1 hour in UTC
 				temperature,
 				precipChance,
 				windSpeed,

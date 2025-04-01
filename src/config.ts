@@ -20,5 +20,5 @@ export const config = {
 	GOOGLE_PRIVATE_KEY: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
 
 	// Calendar event settings
-	DAYS_TO_FORECAST: 7,
+	DAYS_TO_FORECAST: 2,
 };
