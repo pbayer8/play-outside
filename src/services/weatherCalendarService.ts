@@ -1,7 +1,9 @@
-import type { calendar_v3 } from "googleapis";
-import { google } from "googleapis";
 import { config } from "../config";
 import type { NiceWeatherWindow } from "../types";
+import {
+	CalendarColorId,
+	GoogleCalendarService,
+} from "./googleCalendarService";
 
 interface MergedWindow {
 	start: Date;
@@ -19,104 +21,19 @@ function toFixedMax(value: string | number, dp: number) {
 	return +Number.parseFloat(value.toString()).toFixed(dp);
 }
 
-export class CalendarService {
-	calendar;
+export class WeatherCalendarService {
+	private calendarService: GoogleCalendarService;
 
 	constructor() {
-		const auth = new google.auth.JWT({
-			email: config.GOOGLE_CLIENT_EMAIL,
-			key: config.GOOGLE_PRIVATE_KEY,
-			scopes: ["https://www.googleapis.com/auth/calendar"],
-		});
-
-		this.calendar = google.calendar({ version: "v3", auth });
+		this.calendarService = new GoogleCalendarService();
 	}
 
 	async clearAllEvents(includePast = false) {
-		try {
-			const now = new Date();
-			const response = await this.calendar.events.list({
-				calendarId: config.GOOGLE_CALENDAR_ID,
-				timeMin: includePast ? "2020-01-01T00:00:00Z" : now.toISOString(),
-			});
-
-			const events = response.data.items;
-			if (!events || events.length === 0) {
-				console.log("No events found to clear.");
-				return;
-			}
-
-			console.log(`Found ${events.length} events to clear`);
-
-			for (const event of events) {
-				if (event.id) {
-					await this.calendar.events.delete({
-						calendarId: config.GOOGLE_CALENDAR_ID,
-						eventId: event.id,
-					});
-				}
-			}
-
-			console.log(
-				`Successfully cleared ${events.length} events from the calendar.`,
-			);
-		} catch (error) {
-			console.error("Error clearing events:", error);
-			throw error;
-		}
+		return this.calendarService.clearAllEvents(includePast);
 	}
 
 	async clearUpcomingEvents() {
-		try {
-			const timeMin = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
-			console.log("Fetching events from:", timeMin);
-			console.log("Using calendar ID:", config.GOOGLE_CALENDAR_ID);
-
-			let allEvents: calendar_v3.Schema$Event[] = [];
-			let pageToken: string | undefined = undefined;
-
-			do {
-				const response: { data: calendar_v3.Schema$Events } =
-					await this.calendar.events.list({
-						calendarId: config.GOOGLE_CALENDAR_ID,
-						timeMin: timeMin,
-						pageToken: pageToken,
-					});
-
-				console.log("API Response:", JSON.stringify(response.data, null, 2));
-
-				const events = response.data.items || [];
-				allEvents = allEvents.concat(events);
-
-				pageToken = response.data.nextPageToken || undefined;
-
-				if (pageToken) {
-					console.log("More events found, fetching next page...");
-				}
-			} while (pageToken);
-
-			if (allEvents.length === 0) {
-				console.log("No events found in the response");
-				return;
-			}
-
-			console.log(`Found ${allEvents.length} total events to clear.`);
-
-			for (const event of allEvents) {
-				if (event.id) {
-					console.log(`Deleting event: ${event.summary} (${event.id})`);
-					await this.calendar.events.delete({
-						calendarId: config.GOOGLE_CALENDAR_ID,
-						eventId: event.id,
-					});
-				}
-			}
-
-			console.log(`Successfully cleared ${allEvents.length} events`);
-		} catch (error) {
-			console.error("Error clearing events:", error);
-			throw error;
-		}
+		return this.calendarService.clearUpcomingEvents();
 	}
 
 	async createEvents(weatherWindows: NiceWeatherWindow[]) {
@@ -201,25 +118,17 @@ export class CalendarService {
 				const maxPrecipChance = toFixedMax(window.maxPrecipChance, 1);
 				const minWindSpeed = toFixedMax(window.minWindSpeed, 1);
 				const maxWindSpeed = toFixedMax(window.maxWindSpeed, 1);
-				await this.calendar.events.insert({
-					calendarId: config.GOOGLE_CALENDAR_ID,
-					requestBody: {
-						summary: window.conditions,
-						start: {
-							dateTime: window.start.toISOString(),
-							timeZone: config.TZ,
-						},
-						end: {
-							dateTime: window.end.toISOString(),
-							timeZone: config.TZ,
-						},
-						description: [
-							`Temperature: ${minTemp === maxTemp ? minTemp : `${minTemp} - ${maxTemp}`}°F`,
-							`Precipitation: ${minPrecipChance === maxPrecipChance ? minPrecipChance : `${minPrecipChance} - ${maxPrecipChance}`}%`,
-							`Wind: ${minWindSpeed === maxWindSpeed ? minWindSpeed : `${minWindSpeed} - ${maxWindSpeed}`} MPH`,
-						].join("\n"),
-						colorId: this.getColorId(window),
-					},
+
+				await this.calendarService.createEvent({
+					summary: window.conditions,
+					start: window.start,
+					end: window.end,
+					description: [
+						`Temperature: ${minTemp === maxTemp ? minTemp : `${minTemp} - ${maxTemp}`}°F`,
+						`Precipitation: ${minPrecipChance === maxPrecipChance ? minPrecipChance : `${minPrecipChance} - ${maxPrecipChance}`}%`,
+						`Wind: ${minWindSpeed === maxWindSpeed ? minWindSpeed : `${minWindSpeed} - ${maxWindSpeed}`} MPH`,
+					].join("\n"),
+					colorId: this.getColorId(window),
 				});
 			}
 
@@ -267,12 +176,13 @@ export class CalendarService {
 		return conditions.join(", ");
 	}
 
-	private getColorId(window: MergedWindow): string {
-		// 1 Lavender, 2 Sage, 3 Grape, 4 Flamingo, 5 Banana, 6 Tangerine, 7 Peacock, 8 Graphite, 9 Blueberry, 10 Basil, 11 Tomato
-		if (window.maxPrecipChance > config.MAX_PRECIP_CHANCE) return "9";
-		if (window.minTemp < config.MIN_TEMP_F) return "7";
-		if (window.maxTemp > config.MAX_TEMP_F) return "11";
-		if (window.maxWindSpeed > config.MAX_WIND_MPH) return "1";
+	private getColorId(window: MergedWindow): CalendarColorId {
+		if (window.maxPrecipChance > config.MAX_PRECIP_CHANCE)
+			return CalendarColorId.Blueberry;
+		if (window.minTemp < config.MIN_TEMP_F) return CalendarColorId.Peacock;
+		if (window.maxTemp > config.MAX_TEMP_F) return CalendarColorId.Tomato;
+		if (window.maxWindSpeed > config.MAX_WIND_MPH)
+			return CalendarColorId.Lavender;
 
 		if (
 			this.isIdealConditions(
@@ -281,9 +191,9 @@ export class CalendarService {
 				window.maxWindSpeed,
 			)
 		) {
-			return "5";
+			return CalendarColorId.Banana;
 		}
-		return "2";
+		return CalendarColorId.Sage;
 	}
 
 	private isSameDay(date1: Date, date2: Date): boolean {

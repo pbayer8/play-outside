@@ -1,6 +1,6 @@
 import { config } from "./config";
-import { CalendarService } from "./services/calendarService";
 import { SunlightService } from "./services/sunlightService";
+import { WeatherCalendarService } from "./services/weatherCalendarService";
 import { WeatherService } from "./services/weatherService";
 import type { NiceWeatherWindow } from "./types";
 
@@ -61,7 +61,7 @@ async function getWeatherWindows(): Promise<NiceWeatherWindow[]> {
 
 async function main() {
 	try {
-		const calendarService = new CalendarService();
+		const calendarService = new WeatherCalendarService();
 
 		// Clear existing weather windows
 		console.log("Clearing existing calendar events");
