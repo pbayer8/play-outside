@@ -11,8 +11,8 @@ export const config = {
 	// Weather conditions
 	MIN_TEMP_F: 45,
 	MAX_TEMP_F: 75,
-	MAX_PRECIP_CHANCE: 100, // percentage
-	MAX_WIND_MPH: 205, // mph
+	MAX_PRECIP_CHANCE: 20, // percentage
+	MAX_WIND_MPH: 25, // mph
 
 	// Location (Santa Fe, NM)
 	LATITUDE,
