@@ -189,6 +189,7 @@ export async function createEvent(event: {
 				},
 				description: event.description,
 				colorId: event.colorId,
+				transparency: "transparent",
 			},
 		}),
 	);
