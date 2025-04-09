@@ -52,8 +52,22 @@ function getWeatherConditions(window: NiceWeatherWindow): string {
 	if (window.precipChance > config.MAX_PRECIP_CHANCE)
 		conditions.push("💧 Precipitating");
 	if (window.windSpeed > config.MAX_WIND_MPH) conditions.push("💨 Windy");
-	if (conditions.length === 0) return "🌤 Play Outside";
-	return conditions.join(", ");
+
+	// If there are unacceptable conditions, return them as before
+	if (conditions.length > 0) return conditions.join(", ");
+
+	// For windows that are playable but not ideal, show why they're not ideal
+	const nonIdealConditions: string[] = [];
+	if (window.temperature < config.IDEAL_MIN_TEMP_F)
+		nonIdealConditions.push("Cool");
+	else if (window.temperature > config.IDEAL_MAX_TEMP_F)
+		nonIdealConditions.push("Warm");
+	if (window.precipChance > config.IDEAL_PRECIP_CHANCE)
+		nonIdealConditions.push("Some Rain");
+	if (window.windSpeed > config.IDEAL_WIND_MPH)
+		nonIdealConditions.push("Breezy");
+
+	return `🌤 Play Outside${nonIdealConditions.length > 0 ? ` (${nonIdealConditions.join(", ")})` : ""}`;
 }
 
 function getColorId(window: MergedWindow): CalendarColorId {
